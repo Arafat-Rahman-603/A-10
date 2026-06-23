@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '@/lib/axios';
+import Navbar from '@/components/Navbar';
 import PrivateRoute from '@/components/PrivateRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HiBriefcase, HiDocumentText, HiUserGroup } from 'react-icons/hi';
@@ -45,6 +46,7 @@ export default function FounderDashboard() {
 
   return (
     <PrivateRoute allowedRoles={['founder']}>
+    <Navbar/>
       <div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl sm:text-3xl font-extrabold mb-2" style={{ color: 'var(--text-primary)' }}>
