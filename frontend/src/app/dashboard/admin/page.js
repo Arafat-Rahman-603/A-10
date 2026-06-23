@@ -7,7 +7,7 @@ import api from '@/lib/axios';
 import PrivateRoute from '@/components/PrivateRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HiUsers, HiOfficeBuilding, HiBriefcase, HiCurrencyDollar } from 'react-icons/hi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -88,13 +88,32 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>User Growth</h3>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={userChartData}>
+                <LineChart data={userChartData}>
+                  <defs>
+                    <linearGradient id="lineGradientUsers" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#818cf8" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                   <XAxis dataKey="name" stroke="var(--text-tertiary)" fontSize={12} />
-                  <YAxis stroke="var(--text-tertiary)" fontSize={12} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }} />
-                  <Area type="monotone" dataKey="users" stroke="#6366f1" fill="rgba(99,102,241,0.15)" strokeWidth={2} />
-                </AreaChart>
+                  <YAxis stroke="var(--text-tertiary)" fontSize={12} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }}
+                    cursor={{ stroke: 'var(--border-color)', strokeWidth: 1 }}
+                  />
+                  <Legend wrapperStyle={{ color: 'var(--text-secondary)', fontSize: 12, paddingTop: 12 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="users"
+                    name="Users"
+                    stroke="url(#lineGradientUsers)"
+                    strokeWidth={3}
+                    connectNulls
+                    dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6, fill: '#818cf8', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </motion.div>
@@ -103,13 +122,32 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Startups per Month</h3>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={startupChartData}>
+                <LineChart data={startupChartData}>
+                  <defs>
+                    <linearGradient id="lineGradientStartups" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#ec4899" />
+                      <stop offset="100%" stopColor="#f59e0b" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                   <XAxis dataKey="name" stroke="var(--text-tertiary)" fontSize={12} />
-                  <YAxis stroke="var(--text-tertiary)" fontSize={12} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }} />
-                  <Bar dataKey="startups" fill="#ec4899" radius={[8, 8, 0, 0]} />
-                </BarChart>
+                  <YAxis stroke="var(--text-tertiary)" fontSize={12} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }}
+                    cursor={{ stroke: 'var(--border-color)', strokeWidth: 1 }}
+                  />
+                  <Legend wrapperStyle={{ color: 'var(--text-secondary)', fontSize: 12, paddingTop: 12 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="startups"
+                    name="Startups"
+                    stroke="url(#lineGradientStartups)"
+                    strokeWidth={3}
+                    connectNulls
+                    dot={{ r: 4, fill: '#ec4899', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </motion.div>

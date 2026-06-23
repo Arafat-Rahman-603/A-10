@@ -7,7 +7,7 @@ import api from '@/lib/axios';
 import PrivateRoute from '@/components/PrivateRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HiDocumentText, HiClock, HiCheck } from 'react-icons/hi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Dot } from 'recharts';
 
 const COLORS = ['#6366f1', '#f59e0b', '#10b981'];
 
@@ -75,13 +75,32 @@ export default function CollaboratorDashboard() {
             <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Applications Overview</h3>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
+                <LineChart data={chartData}>
+                  <defs>
+                    <linearGradient id="lineGradientCollab" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                   <XAxis dataKey="name" stroke="var(--text-tertiary)" fontSize={12} />
-                  <YAxis stroke="var(--text-tertiary)" fontSize={12} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }} />
-                  <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
-                </BarChart>
+                  <YAxis stroke="var(--text-tertiary)" fontSize={12} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', color: 'var(--text-primary)' }}
+                    cursor={{ stroke: 'var(--border-color)', strokeWidth: 1 }}
+                  />
+                  <Legend wrapperStyle={{ color: 'var(--text-secondary)', fontSize: 12, paddingTop: 12 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    name="Applications"
+                    stroke="url(#lineGradientCollab)"
+                    strokeWidth={3}
+                    connectNulls
+                    dot={{ r: 5, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 7, fill: '#ec4899', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </motion.div>

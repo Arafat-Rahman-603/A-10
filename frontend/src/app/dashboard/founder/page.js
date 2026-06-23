@@ -7,7 +7,7 @@ import api from '@/lib/axios';
 import PrivateRoute from '@/components/PrivateRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { HiBriefcase, HiDocumentText, HiUserGroup } from 'react-icons/hi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const COLORS = ['#6366f1', '#ec4899', '#10b981', '#f59e0b'];
 
@@ -88,10 +88,16 @@ export default function FounderDashboard() {
             <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Overview</h3>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
+                <LineChart data={chartData}>
+                  <defs>
+                    <linearGradient id="lineGradientFounder" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                   <XAxis dataKey="name" stroke="var(--text-tertiary)" fontSize={12} />
-                  <YAxis stroke="var(--text-tertiary)" fontSize={12} />
+                  <YAxis stroke="var(--text-tertiary)" fontSize={12} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
                       background: 'var(--bg-card)',
@@ -99,9 +105,20 @@ export default function FounderDashboard() {
                       borderRadius: '12px',
                       color: 'var(--text-primary)'
                     }}
+                    cursor={{ stroke: 'var(--border-color)', strokeWidth: 1 }}
                   />
-                  <Bar dataKey="value" fill="#6366f1" radius={[8, 8, 0, 0]} />
-                </BarChart>
+                  <Legend wrapperStyle={{ color: 'var(--text-secondary)', fontSize: 12, paddingTop: 12 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    name="Count"
+                    stroke="url(#lineGradientFounder)"
+                    strokeWidth={3}
+                    connectNulls
+                    dot={{ r: 5, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 7, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </motion.div>
