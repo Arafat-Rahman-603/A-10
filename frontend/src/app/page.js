@@ -29,6 +29,8 @@ const stagger = {
 export default function HomePage() {
   const [featuredStartups, setFeaturedStartups] = useState([]);
   const [featuredOpportunities, setFeaturedOpportunities] = useState([]);
+  const [heroStats, setHeroStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     fetchFeatured();
@@ -36,22 +38,44 @@ export default function HomePage() {
 
   const fetchFeatured = async () => {
     try {
-      const [startupsRes, oppsRes] = await Promise.all([
+      const [startupsRes, oppsRes, statsRes] = await Promise.all([
         api.get('/startups/featured').catch(() => ({ data: { startups: [] } })),
-        api.get('/opportunities/featured').catch(() => ({ data: { opportunities: [] } }))
+        api.get('/opportunities/featured').catch(() => ({ data: { opportunities: [] } })),
+        api.get('/stats/public').catch(() => ({ data: { stats: null } }))
       ]);
       setFeaturedStartups(startupsRes.data.startups || []);
       setFeaturedOpportunities(oppsRes.data.opportunities || []);
+      if (statsRes.data.stats) {
+        setHeroStats(statsRes.data.stats);
+      }
     } catch (error) {
       console.error('Failed to fetch featured data');
+    } finally {
+      setStatsLoading(false);
     }
   };
 
   const stats = [
-    { label: 'Active Startups', value: '500+', icon: HiRocketLaunch },
-    { label: 'Open Roles', value: '1,200+', icon: HiBriefcase },
-    { label: 'Team Members', value: '3,000+', icon: HiUserGroup },
-    { label: 'Success Rate', value: '94%', icon: HiTrendingUp },
+    { 
+      label: 'Active Startups', 
+      value: statsLoading ? null : heroStats ? `${heroStats.totalStartups}+` : '0+', 
+      icon: HiRocketLaunch 
+    },
+    { 
+      label: 'Open Roles', 
+      value: statsLoading ? null : heroStats ? `${heroStats.totalOpportunities}+` : '0+', 
+      icon: HiBriefcase 
+    },
+    { 
+      label: 'Team Members', 
+      value: statsLoading ? null : heroStats ? `${heroStats.totalUsers}+` : '0+', 
+      icon: HiUserGroup 
+    },
+    { 
+      label: 'Hired via Platform', 
+      value: statsLoading ? null : heroStats ? `${heroStats.acceptedApplications}+` : '0+', 
+      icon: HiTrendingUp 
+    },
   ];
 
   const features = [
@@ -198,7 +222,11 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
                   <stat.icon className="text-white text-xl" />
                 </div>
-                <p className="text-2xl sm:text-3xl font-extrabold text-gradient mb-1">{stat.value}</p>
+                {stat.value === null ? (
+                  <div className="h-8 w-16 mx-auto rounded-lg mb-1 animate-pulse" style={{ background: 'rgba(99,102,241,0.15)' }} />
+                ) : (
+                  <p className="text-2xl sm:text-3xl font-extrabold text-gradient mb-1">{stat.value}</p>
+                )}
                 <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{stat.label}</p>
               </motion.div>
             ))}

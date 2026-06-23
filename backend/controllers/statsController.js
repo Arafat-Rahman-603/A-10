@@ -5,6 +5,30 @@ const Application = require('../models/Application');
 const Payment = require('../models/Payment');
 
 
+exports.getPublicStats = async (req, res, next) => {
+  try {
+    const [totalStartups, totalOpportunities, totalUsers, acceptedApplications] = await Promise.all([
+      Startup.countDocuments({ status: 'approved' }),
+      Opportunity.countDocuments(),
+      User.countDocuments(),
+      Application.countDocuments({ status: 'accepted' }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalStartups,
+        totalOpportunities,
+        totalUsers,
+        acceptedApplications,
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 
 exports.getAdminStats = async (req, res, next) => {
   try {

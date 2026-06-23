@@ -13,8 +13,9 @@ const applicationSchema = new mongoose.Schema({
   },
   portfolio_link: {
     type: String,
-    required: [true, 'Portfolio link is required']
+    default: ''
   },
+
   motivation: {
     type: String,
     required: [true, 'Motivation message is required'],

@@ -7,7 +7,6 @@ import PrivateRoute from '@/components/PrivateRoute';
 import OpportunityCard from '@/components/OpportunityCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import Pagination from '@/components/Pagination';
-import Link from 'next/link';
 import { HiSearch } from 'react-icons/hi';
 
 export default function CollaboratorOpportunities() {
@@ -59,9 +58,7 @@ export default function CollaboratorOpportunities() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {opportunities.map((opp, i) => (
-                <Link key={opp._id} href={`/dashboard/collaborator/opportunities/${opp._id}`}>
-                  <OpportunityCard opportunity={opp} index={i} />
-                </Link>
+                <OpportunityCard key={opp._id} opportunity={opp} index={i} />
               ))}
             </div>
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
