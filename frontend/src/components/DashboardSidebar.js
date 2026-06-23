@@ -9,7 +9,7 @@ import {
   HiViewGrid, HiMenu, HiX, HiLogout,
   HiOfficeBuilding, HiBriefcase, HiDocumentText,
   HiUsers, HiCreditCard, HiUser, HiChartBar,
-  HiCog, HiCollection
+  HiCog, HiCollection, HiHome
 } from 'react-icons/hi';
 import { HiRocketLaunch } from 'react-icons/hi2';
 
@@ -60,8 +60,24 @@ export default function DashboardSidebar() {
         </div>
       </div>
 
-      {}
+      {/* Nav Links */}
       <nav className="flex-1 p-4 space-y-1">
+        {/* Home Button */}
+        <Link
+          href="/"
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+            pathname === '/'
+              ? 'bg-gradient-primary text-white shadow-lg shadow-indigo-500/20'
+              : 'hover:bg-gradient-subtle'
+          }`}
+          style={pathname !== '/' ? { color: 'var(--text-secondary)' } : {}}
+        >
+          <HiHome className="text-lg flex-shrink-0" />
+          Home
+        </Link>
+
+        <div className="my-2 border-t" style={{ borderColor: 'var(--border-color)' }} />
+
         {items.map((item) => {
           const isActive = pathname === item.href;
           return (
