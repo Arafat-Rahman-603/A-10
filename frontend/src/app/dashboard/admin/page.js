@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Navbar from '@/components/Navbar';
 import api from '@/lib/axios';
 import PrivateRoute from '@/components/PrivateRoute';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -52,6 +53,7 @@ export default function AdminDashboard() {
     <PrivateRoute allowedRoles={['admin']}>
       <div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Navbar/>
           <h1 className="text-2xl sm:text-3xl font-extrabold mb-2" style={{ color: 'var(--text-primary)' }}>
             Admin Dashboard
           </h1>
