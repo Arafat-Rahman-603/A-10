@@ -91,7 +91,10 @@ exports.getFounderStats = async (req, res, next) => {
         stats: {
           totalOpportunities: 0,
           totalApplications: 0,
-          acceptedMembers: 0
+          acceptedMembers: 0,
+          pendingApplications: 0,
+          rejectedApplications: 0,
+          applicationsOverTime: []
         }
       });
     }
@@ -108,12 +111,47 @@ exports.getFounderStats = async (req, res, next) => {
       status: 'accepted'
     });
 
+    const pendingApplications = await Application.countDocuments({
+      opportunity_id: { $in: opportunityIds },
+      status: 'pending'
+    });
+
+    const rejectedApplications = await Application.countDocuments({
+      opportunity_id: { $in: opportunityIds },
+      status: 'rejected'
+    });
+
+    const applicationsOverTimeRaw = await Application.aggregate([
+      {
+        $match: {
+          opportunity_id: { $in: opportunityIds }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const applicationsOverTime = applicationsOverTimeRaw.map(item => ({
+      name: item._id,
+      value: item.count
+    }));
+
     res.status(200).json({
       success: true,
       stats: {
         totalOpportunities: opportunities.length,
         totalApplications,
-        acceptedMembers
+        acceptedMembers,
+        pendingApplications,
+        rejectedApplications,
+        applicationsOverTime
       }
     });
   } catch (error) {
@@ -148,6 +186,6 @@ exports.getCollaboratorStats = async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    
   }
 };

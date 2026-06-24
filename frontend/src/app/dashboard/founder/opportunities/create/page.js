@@ -12,13 +12,13 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { HiLockClosed } from 'react-icons/hi';
 
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.startsWith('pk_')
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   : null;
 
-function PaymentModal({ onSuccess, onClose }) {
-  const stripe = useStripe();
-  const elements = useElements();
+function PaymentModal({ onSuccess, onClose, stripeEnabled }) {
+  const stripe = stripeEnabled ? useStripe() : null;
+  const elements = stripeEnabled ? useElements() : null;
   const [processing, setProcessing] = useState(false);
 
   const handlePayment = async (e) => {
@@ -27,7 +27,7 @@ function PaymentModal({ onSuccess, onClose }) {
     
     setProcessing(true);
     try {
-      const { data } = await api.post('/payments/create-payment-intent', { amount: 4999 });
+      const { data } = await api.post('/payments/create-payment-intent', { amount: 2500 });
       
       const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: { card: elements.getElement(CardElement) }
@@ -50,6 +50,23 @@ function PaymentModal({ onSuccess, onClose }) {
     }
   };
 
+  const handleMockPayment = async () => {
+    setProcessing(true);
+    try {
+      const randomTxId = 'ch_mock_' + Math.random().toString(36).substring(2, 15);
+      await api.post('/payments/confirm', {
+        transaction_id: randomTxId,
+        amount: 2500
+      });
+      toast.success('Mock payment successful! You can now create unlimited opportunities.');
+      onSuccess();
+    } catch (error) {
+      toast.error('Mock payment failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div
@@ -65,27 +82,52 @@ function PaymentModal({ onSuccess, onClose }) {
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             You&apos;ve reached the free limit of 3 opportunities. Upgrade for unlimited posts.
           </p>
-          <p className="text-3xl font-extrabold mt-4 text-gradient">$49.99</p>
+          <p className="text-3xl font-extrabold mt-4 text-gradient">$25.00</p>
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>One-time payment</p>
         </div>
 
-        <form onSubmit={handlePayment} className="space-y-4">
-          <div className="p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
-            <CardElement
-              options={{
-                style: {
-                  base: { fontSize: '16px', color: 'var(--text-primary)' },
-                  invalid: { color: '#ef4444' }
-                }
-              }}
-            />
+        <form onSubmit={stripeEnabled ? handlePayment : (e) => e.preventDefault()} className="space-y-4">
+          {stripeEnabled ? (
+            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}>
+              <CardElement
+                options={{
+                  style: {
+                    base: { fontSize: '16px', color: 'var(--text-primary)' },
+                    invalid: { color: '#ef4444' }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="text-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs">
+              ⚠️ Stripe Test Keys not configured (Publishable Key must start with pk_test_).
+              Please use the developer mock payment option below to unlock your account.
+            </div>
+          )}
+
+          {stripeEnabled ? (
+            <button type="submit" disabled={!stripe || processing} className="btn-primary w-full !py-3 disabled:opacity-60">
+              {processing ? 'Processing...' : 'Pay $25.00'}
+            </button>
+          ) : (
+            <button type="button" disabled className="w-full !py-3 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-tertiary)] text-xs font-semibold cursor-not-allowed">
+              Real Payment Disabled
+            </button>
+          )}
+          
+          <div className="flex flex-col gap-2 pt-2 border-t border-[var(--border-color)]">
+            <button
+              type="button"
+              onClick={handleMockPayment}
+              disabled={processing}
+              className="w-full !py-2.5 rounded-xl border border-dashed border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-xs font-semibold text-indigo-400"
+            >
+              Simulate Mock Payment (Dev Mode)
+            </button>
+            <button type="button" onClick={onClose} className="btn-secondary w-full !py-2.5">
+              Cancel
+            </button>
           </div>
-          <button type="submit" disabled={!stripe || processing} className="btn-primary w-full !py-3 disabled:opacity-60">
-            {processing ? 'Processing...' : 'Pay $49.99'}
-          </button>
-          <button type="button" onClick={onClose} className="btn-secondary w-full !py-3">
-            Cancel
-          </button>
         </form>
       </motion.div>
     </div>
@@ -157,26 +199,24 @@ function CreateOpportunityForm() {
 
   return (
     <>
-      {showPayment && stripePromise && (
-        <Elements stripe={stripePromise}>
+      {showPayment && (
+        stripePromise ? (
+          <Elements stripe={stripePromise}>
+            <PaymentModal
+              onSuccess={() => { setShowPayment(false); }}
+              onClose={() => setShowPayment(false)}
+              stripeEnabled={true}
+            />
+          </Elements>
+        ) : (
           <PaymentModal
             onSuccess={() => { setShowPayment(false); }}
             onClose={() => setShowPayment(false)}
+            stripeEnabled={false}
           />
-        </Elements>
+        )
       )}
 
-      {showPayment && !stripePromise && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-card rounded-3xl p-8 max-w-md w-full text-center">
-            <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Stripe Not Configured</h3>
-            <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-              Add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to your .env.local file.
-            </p>
-            <button onClick={() => setShowPayment(false)} className="btn-primary">Close</button>
-          </div>
-        </div>
-      )}
 
       <div className="glass-card rounded-2xl p-8">
         <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>Create New Opportunity</h2>
