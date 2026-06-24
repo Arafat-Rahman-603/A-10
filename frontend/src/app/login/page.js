@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -9,12 +9,55 @@ import toast from 'react-hot-toast';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { HiRocketLaunch } from 'react-icons/hi2';
+import Script from 'next/script';
+import axios from 'axios';
 
 export default function LoginPage() {
   const { login, googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [tokenClient, setTokenClient] = useState(null);
   const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const initGoogleAuth = () => {
+    if (window.google) {
+      setGoogleLoaded(true);
+      try {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          scope: 'email profile',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              setLoading(true);
+              try {
+                const userInfoRes = await axios.get(
+                  `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`
+                );
+                const { name, email, picture } = userInfoRes.data;
+                await googleLogin({ name, email, image: picture });
+                toast.success('Welcome back!');
+              } catch (error) {
+                console.error('Google login error:', error);
+                toast.error(error.response?.data?.message || 'Google authentication failed');
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        });
+        setTokenClient(client);
+      } catch (error) {
+        console.error('Error initializing Google Auth Client:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (window.google && !tokenClient) {
+      initGoogleAuth();
+    }
+  }, []);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -28,12 +71,21 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    
-    toast.error('Google OAuth requires configuration. Add your Google Client ID in .env');
+  const handleGoogleLogin = () => {
+    if (!tokenClient) {
+      toast.error('Google Sign-In is still loading. Please try again.');
+      return;
+    }
+    tokenClient.requestAccessToken();
   };
 
   return (
+    <>
+      <Script 
+        src="https://accounts.google.com/gsi/client" 
+        onLoad={initGoogleAuth}
+        strategy="afterInteractive"
+      />
     <div className="min-h-screen flex items-center justify-center py-20 px-4 relative overflow-hidden">
       {}
       <div className="absolute inset-0">
@@ -67,11 +119,12 @@ export default function LoginPage() {
           {}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl text-sm font-semibold transition-all hover:shadow-md mb-6"
+            disabled={loading || !googleLoaded}
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl text-sm font-semibold transition-all hover:shadow-md mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
           >
             <FcGoogle className="text-xl" />
-            Continue with Google
+            {!googleLoaded ? 'Loading Google Sign-in...' : 'Continue with Google'}
           </button>
 
           <div className="flex items-center gap-4 mb-6">
@@ -140,5 +193,6 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
+    </>
   );
 }
