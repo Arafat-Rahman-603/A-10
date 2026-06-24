@@ -25,7 +25,7 @@ export default function Footer() {
   const socialLinks = [
     { href: 'https://github.com', icon: FaGithub, label: 'GitHub' },
     { href: 'https://twitter.com', icon: FaTwitter, label: 'Twitter' },
-    { href: '#', icon: FaLinkedin, label: 'LinkedIn' },
+    { href: 'https://linkedin.com', icon: FaLinkedin, label: 'LinkedIn' },
     { href: '#', icon: FaDiscord, label: 'Discord' },
   ];
 
