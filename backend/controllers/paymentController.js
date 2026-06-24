@@ -163,6 +163,6 @@ exports.verifyCheckoutSession = async (req, res, next) => {
       });
     }
   } catch (error) {
-    
+    next(error);
   }
 };
