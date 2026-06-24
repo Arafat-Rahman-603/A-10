@@ -21,7 +21,7 @@ const cookieOptions = {
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, role, image } = req.body;
+    const { name, email, password, role, image } = req.bod;
 
     
     const existingUser = await User.findOne({ email });
@@ -125,7 +125,7 @@ exports.login = async (req, res, next) => {
 
 exports.googleAuth = async (req, res, next) => {
   try {
-    const { name, email, image } = req.body;
+    const { name, email, image, role } = req.body;
 
     if (!email) {
       throw new AppError('Email is required', 400);
@@ -139,7 +139,7 @@ exports.googleAuth = async (req, res, next) => {
 
     if (!user) {
       
-      let userRole = 'collaborator';
+      let userRole = role || 'collaborator';
       if (email === process.env.ADMIN_EMAIL) {
         userRole = 'admin';
       }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -10,16 +10,68 @@ import toast from 'react-hot-toast';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiUser, HiPhotograph } from 'react-icons/hi';
 import { FcGoogle } from 'react-icons/fc';
 import { HiRocketLaunch } from 'react-icons/hi2';
+import Script from 'next/script';
+import axios from 'axios';
 
 export default function RegisterPage() {
-  const { register: authRegister } = useAuth();
+  const { register: authRegister, googleLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [tokenClient, setTokenClient] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const { register, handleSubmit, formState: { errors }, watch } = useForm({
     defaultValues: { role: 'collaborator' }
   });
+
+  const initGoogleAuth = () => {
+    if (window.google) {
+      setGoogleLoaded(true);
+      try {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          scope: 'email profile',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              setLoading(true);
+              try {
+                const userInfoRes = await axios.get(
+                  `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`
+                );
+                const { name, email, picture } = userInfoRes.data;
+                const selectedRole = watch('role') || 'collaborator';
+                await googleLogin({ name, email, image: picture, role: selectedRole });
+                toast.success('Welcome back!');
+              } catch (error) {
+                console.error('Google login error:', error);
+                toast.error(error.response?.data?.message || 'Google authentication failed');
+              } finally {
+                setLoading(false);
+              }
+            }
+          },
+        });
+        setTokenClient(client);
+      } catch (error) {
+        console.error('Error initializing Google Auth Client:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (window.google && !tokenClient) {
+      initGoogleAuth();
+    }
+  }, []);
+
+  const handleGoogleSignup = () => {
+    if (!tokenClient) {
+      toast.error('Google Sign-In is still loading. Please try again.');
+      return;
+    }
+    tokenClient.requestAccessToken();
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -57,7 +109,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-20 px-4 relative overflow-hidden">
+    <>
+      <Script 
+        src="https://accounts.google.com/gsi/client" 
+        onLoad={initGoogleAuth}
+        strategy="afterInteractive"
+      />
+      <div className="min-h-screen flex items-center justify-center py-20 px-4 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-20 right-10 w-72 h-72 bg-pink-500/15 rounded-full blur-[120px]" />
         <div className="absolute bottom-20 left-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-[120px]" />
@@ -84,6 +142,23 @@ export default function RegisterPage() {
         </div>
 
         <div className="glass-card rounded-3xl p-8">
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={loading || !googleLoaded}
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl text-sm font-semibold transition-all hover:shadow-md mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+          >
+            <FcGoogle className="text-xl" />
+            {!googleLoaded ? 'Loading Google Sign-in...' : 'Sign up with Google'}
+          </button>
+
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex-1 h-px" style={{ background: 'var(--border-color)' }} />
+            <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>or</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--border-color)' }} />
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {}
             <div className="flex justify-center">
@@ -212,5 +287,6 @@ export default function RegisterPage() {
         </div>
       </motion.div>
     </div>
+    </>
   );
 }
