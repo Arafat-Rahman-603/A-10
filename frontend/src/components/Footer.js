@@ -26,7 +26,7 @@ export default function Footer() {
     { href: 'https://github.com', icon: FaGithub, label: 'GitHub' },
     { href: 'https://twitter.com', icon: FaTwitter, label: 'Twitter' },
     { href: 'https://linkedin.com', icon: FaLinkedin, label: 'LinkedIn' },
-    { href: '#', icon: FaDiscord, label: 'Discord' },
+    { href: 'https://discord.com', icon: FaDiscord, label: 'Discord' },
   ];
 
   return (
