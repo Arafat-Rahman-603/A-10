@@ -148,7 +148,7 @@ function PaymentSuccessContent() {
           className="text-2xl font-extrabold mb-3"
           style={{ color: 'var(--text-primary)' }}
         >
-          Payment Successful! 🎉
+          Payment Successful!
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 10 }}
