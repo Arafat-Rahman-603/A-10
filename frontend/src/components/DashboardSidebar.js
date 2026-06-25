@@ -25,6 +25,7 @@ const menuItems = {
     { href: '/dashboard/founder/startup', label: 'My Startup', icon: HiRocketLaunch },
     { href: '/dashboard/founder/opportunities', label: 'Opportunities', icon: HiBriefcase },
     { href: '/dashboard/founder/applications', label: 'Applications', icon: HiDocumentText },
+    { href: '/dashboard/founder/profile', label: 'Profile', icon: HiUser },
   ],
   collaborator: [
     { href: '/dashboard/collaborator', label: 'Overview', icon: HiViewGrid },

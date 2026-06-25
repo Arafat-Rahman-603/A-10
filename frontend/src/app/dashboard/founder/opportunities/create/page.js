@@ -50,23 +50,6 @@ function PaymentModal({ onSuccess, onClose, stripeEnabled }) {
     }
   };
 
-  const handleMockPayment = async () => {
-    setProcessing(true);
-    try {
-      const randomTxId = 'ch_mock_' + Math.random().toString(36).substring(2, 15);
-      await api.post('/payments/confirm', {
-        transaction_id: randomTxId,
-        amount: 2500
-      });
-      toast.success('Mock payment successful! You can now create unlimited opportunities.');
-      onSuccess();
-    } catch (error) {
-      toast.error('Mock payment failed. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <motion.div
@@ -101,7 +84,6 @@ function PaymentModal({ onSuccess, onClose, stripeEnabled }) {
           ) : (
             <div className="text-center p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs">
               ⚠️ Stripe Test Keys not configured (Publishable Key must start with pk_test_).
-              Please use the developer mock payment option below to unlock your account.
             </div>
           )}
 
@@ -116,14 +98,6 @@ function PaymentModal({ onSuccess, onClose, stripeEnabled }) {
           )}
           
           <div className="flex flex-col gap-2 pt-2 border-t border-[var(--border-color)]">
-            <button
-              type="button"
-              onClick={handleMockPayment}
-              disabled={processing}
-              className="w-full !py-2.5 rounded-xl border border-dashed border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-xs font-semibold text-indigo-400"
-            >
-              Simulate Mock Payment (Dev Mode)
-            </button>
             <button type="button" onClick={onClose} className="btn-secondary w-full !py-2.5">
               Cancel
             </button>

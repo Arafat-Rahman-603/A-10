@@ -36,22 +36,6 @@ function PaymentModal({ onSuccess, onClose }) {
     }
   };
 
-  const handleMockPayment = async () => {
-    setProcessing(true);
-    try {
-      const randomTxId = 'ch_mock_' + Math.random().toString(36).substring(2, 15);
-      await api.post('/payments/confirm', {
-        transaction_id: randomTxId,
-        amount: 2500
-      });
-      toast.success('Mock payment successful! You can now create unlimited opportunities.');
-      onSuccess();
-    } catch (error) {
-      toast.error('Mock payment failed. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
