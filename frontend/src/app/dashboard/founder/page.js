@@ -97,14 +97,6 @@ function PaymentModal({ onSuccess, onClose }) {
           </button>
 
           <div className="flex flex-col gap-2 pt-3 border-t border-[var(--border-color)]">
-            <button
-              type="button"
-              onClick={handleMockPayment}
-              disabled={processing}
-              className="w-full !py-2.5 rounded-xl border border-dashed border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-xs font-semibold text-indigo-400"
-            >
-              Simulate Mock Payment (Dev Mode)
-            </button>
             <button type="button" onClick={onClose} className="btn-secondary w-full !py-2.5">
               Cancel
             </button>
